@@ -57,13 +57,13 @@ namespace TicTacToe {
 		return (m_BitMap & 0b010101010101010101) == 0b010101010101010101;
 	}
 
-	bool Board::IsCellEmpty(uint8_t x, uint8_t y)
+	bool Board::IsEmptyCell(uint8_t x, uint8_t y)
 	{
 		uint32_t index = y * 3 + x;
 		return BIT_VALUE(m_BitMap, index * 2) == 0;
 	}
 
-	bool Board::IsCellEmpty(uint32_t index)
+	bool Board::IsEmptyCell(uint32_t index)
 	{
 		return BIT_VALUE(m_BitMap, index * 2) == 0;
 	}

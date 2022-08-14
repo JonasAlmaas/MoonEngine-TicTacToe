@@ -99,7 +99,7 @@ namespace TicTacToe {
 		// -- Draw Players --
 		for (uint32_t cellIndex = 0; cellIndex < 9; cellIndex++)
 		{
-			if (!m_Board.IsCellEmpty(cellIndex))
+			if (!m_Board.IsEmptyCell(cellIndex))
 			{
 				float x = (float)(cellIndex % 3) * m_Style.CellSize - m_Style.CellSize;
 				float y = (float)(cellIndex / 3) * -m_Style.CellSize + m_Style.CellSize;
@@ -202,12 +202,9 @@ namespace TicTacToe {
 					uint32_t cellX = (uint32_t)((float)relX / pixelsPerCell);
 					uint32_t cellY = (uint32_t)((float)relY / pixelsPerCell);
 
-					// 0 - 8 board position
-					uint32_t cellIndex = cellY * 3 + cellX;
-
-					if (m_Board.IsCellEmpty(cellIndex))
+					if (m_Board.IsEmptyCell(cellX, cellY))
 					{
-						m_Board.SetCell(cellIndex, m_Turn);
+						m_Board.SetCell(cellX, cellY, m_Turn);
 
 						// Checks if the last move was a winning move.
 						if (m_Board.Evaluate(m_Turn))
@@ -217,7 +214,7 @@ namespace TicTacToe {
 							else
 								m_Score.O++;
 
-							ME_LOG("Player {} won!", (bool)m_Turn ? "X" : "O");
+							ME_LOG("Player {} won!", (bool)m_Turn ? "O" : "X");
 							m_GameState = GameState::Over;
 						}
 						else if (m_Board.IsFull())

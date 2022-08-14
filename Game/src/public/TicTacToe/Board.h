@@ -16,8 +16,8 @@ namespace TicTacToe {
 		bool Evaluate(Team team);
 		bool IsFull();
 
-		bool IsCellEmpty(uint8_t x, uint8_t y);
-		bool IsCellEmpty(uint32_t index);
+		bool IsEmptyCell(uint8_t x, uint8_t y);
+		bool IsEmptyCell(uint32_t index);
 
 		void SetCell(uint8_t x, uint8_t y, Team team);
 		void SetCell(uint32_t index, Team team);
