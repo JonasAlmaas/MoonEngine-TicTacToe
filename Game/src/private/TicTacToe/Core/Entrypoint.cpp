@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <Moon/Core/Entrypoint.h>
 
-#include "GameName/Core/Application.h"
+#include "TicTacToe/Core/Application.h"
 
 
 namespace Moon {
@@ -10,12 +10,12 @@ namespace Moon {
 	{
 		ApplicationSpecification spec;
 		spec.CommandLineArgs = args;
-		spec.Name = "GameName";
+		spec.Name = "TicTacToe";
 		spec.WorkingDirectory = "../Game";
 		spec.WindowWidth = 1920;
 		spec.WindowHeight = 1080;
 
-		return new GameName::Application(spec);
+		return new TicTacToe::Application(spec);
 	}
 
 }

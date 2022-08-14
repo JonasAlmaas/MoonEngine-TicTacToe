@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace GameName {
+namespace TicTacToe {
 
 	class Application : public Moon::Application
 	{

@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "GameName/GameLayer.h"
+#include "TicTacToe/GameLayer.h"
 
 
-namespace GameName {
+namespace TicTacToe {
 
 	GameLayer::GameLayer()
 		: Layer("GameLayer")
@@ -13,17 +13,15 @@ namespace GameName {
 	{
 	}
 
-	void GameLayer::OnDetach()
-	{
-	}
-
 	void GameLayer::OnUpdate(Timestep ts)
 	{
 	}
 
-	void GameLayer::OnImGuiRender()
+	void GameLayer::DrawBoard()
 	{
 	}
+
+	// -- Event hanling --
 
 	void GameLayer::OnEvent(Event& e)
 	{

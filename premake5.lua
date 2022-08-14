@@ -1,7 +1,7 @@
 include "./Engine/vendor/premake/premake_customization/solution_items.lua"
 include "Dependencies.lua"
 
-workspace "GameName"
+workspace "TicTacToe"
     architecture "x86_64"
     startproject "Game"
 

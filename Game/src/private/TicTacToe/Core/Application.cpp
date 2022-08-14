@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "GameName/Core/Application.h"
+#include "TicTacToe/Core/Application.h"
 
-#include "GameName/GameLayer.h"
+#include "TicTacToe/GameLayer.h"
 
 
-namespace GameName {
+namespace TicTacToe {
 
 	Application::Application(const Moon::ApplicationSpecification& spec)
 		: Moon::Application(spec)

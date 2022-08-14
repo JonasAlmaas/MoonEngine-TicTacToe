@@ -3,7 +3,7 @@
 using namespace Moon;
 
 
-namespace GameName {
+namespace TicTacToe {
 
 	class GameLayer : public Layer
 	{
@@ -12,9 +12,7 @@ namespace GameName {
 		virtual ~GameLayer() = default;
 
 		virtual void OnAttach() override;
-		virtual void OnDetach() override;
 		virtual void OnUpdate(Timestep ts) override;
-		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
 
 	};
