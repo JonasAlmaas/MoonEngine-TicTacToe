@@ -20,6 +20,10 @@ namespace TicTacToe {
 		m_Style.XLineRadius = m_Style.XLineWidth * 0.5f;
 		m_Style.CircleThickness = m_Style.XLineWidth * 2.0f / m_Style.InnerCellSize;
 
+		m_Style.TextSizeSmall = 0.03f;
+		m_Style.TextSizeBig = 0.1f;
+		m_Style.TextSizeTitle = 0.125f;
+
 		m_Style.BackgroundColor = Color("#533747");
 		m_Style.WhiteColor = Color("#FFEEE2");
 		m_Style.GreenColor = Color("#7B9E89");
@@ -29,9 +33,6 @@ namespace TicTacToe {
 
 	void GameLayer::OnAttach()
 	{
-		// TODO: REMOVE!
-		m_GameMode = GameMode::TwoPlayer;
-
 		// Set up camera
 		m_Camera = CreateRef<OrthographicCamera>(1.0f);
 		auto [width, height] = Application::Get().GetWindow().GetSize();
@@ -39,6 +40,12 @@ namespace TicTacToe {
 
 		m_Turn = (Team)Random::Bool();
 
+		// Load fonts
+		m_FontRobotoBold = AssetImporter::ImportFromFile<FontAsset>("Content/Fonts/Roboto-Bold.ttf");
+		m_FontRobotoMedium = AssetImporter::ImportFromFile<FontAsset>("Content/Fonts/Roboto-Medium.ttf");
+
+		// Load textures
+		m_GearTexture = Texture2D::Create("Content/Textures/gear.png");
 
 		// Set up renderer
 		RenderCommand::SetDepthTest(false);
@@ -51,7 +58,7 @@ namespace TicTacToe {
 		RenderCommand::Clear();
 
 		DrawBoard();
-		//DrawScoreboard();
+		DrawUI();
 	}
 
 	void GameLayer::DrawBoard()
@@ -147,8 +154,57 @@ namespace TicTacToe {
 		Renderer2D::EndScene();
 	}
 
-	void GameLayer::DrawScoreboard()
+	void GameLayer::DrawUI()
 	{
+		Renderer2D::BeginScene(m_Camera);
+
+		// -- Title --
+		TextSurface textTitle = TextSurface("Tic-Tac-Toe", m_FontRobotoMedium, m_Style.TextSizeTitle, m_Style.WhiteColor);
+		float titleY = m_Style.BoardSize * 0.5f + (1.0f - m_Style.BoardSize) * 0.25f - textTitle.GetHeight() * 0.5f;
+		Renderer::RenderTextSurface(textTitle, { -textTitle.GetWidth() * 0.5f, titleY });
+
+		// -- Soreboard --
+		TextSurface textX;
+		TextSurface textO;
+		TextSurface textTie = TextSurface("TIE", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+
+		switch (m_GameMode)
+		{
+			case TicTacToe::GameMode::SinglePlayer:
+			{
+				textX = TextSurface("PLAYER (X)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				textO = TextSurface("COMPUTER (O)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				break;
+			}
+			case TicTacToe::GameMode::TwoPlayer:
+			{
+				textX = TextSurface("PLAYER (X)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				textO = TextSurface("PLAYER (O)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				break;
+			}
+		}
+
+		TextSurface textScoreX = TextSurface(std::format("{}", m_Score.X), m_FontRobotoBold, m_Style.TextSizeBig, m_Style.WhiteColor);
+		TextSurface textScoreO = TextSurface(std::format("{}", m_Score.O), m_FontRobotoBold, m_Style.TextSizeBig, m_Style.WhiteColor);
+		TextSurface textScoreTie = TextSurface(std::format("{}", m_Score.Tie), m_FontRobotoBold, m_Style.TextSizeBig, m_Style.WhiteColor);
+
+		Renderer::RenderTextSurface(textX, { -0.15f - textX.GetWidth() * 0.5f, -0.32f });
+		Renderer::RenderTextSurface(textO, { 0.15f - textO.GetWidth() * 0.5f, -0.32f });
+		Renderer::RenderTextSurface(textTie, { -textTie.GetWidth() * 0.5f, -0.32f });
+
+		Renderer::RenderTextSurface(textScoreX, { -0.15f - textScoreX.GetWidth() * 0.5f, -0.4f });
+		Renderer::RenderTextSurface(textScoreO, { 0.15f - textScoreO.GetWidth() * 0.5f, -0.4f });
+		Renderer::RenderTextSurface(textScoreTie, { -textScoreTie.GetWidth() * 0.5f, -0.4f });
+
+		// Render ui sprites
+		{
+			glm::vec2 pos = { 0.3f, -0.4f + m_Style.TextSizeBig * 0.25f };
+			glm::vec2 size = { m_Style.TextSizeBig * 0.5f, m_Style.TextSizeBig * 0.5f };
+			Renderer2D::DrawSprite(pos, size, m_GearTexture, m_Style.WhiteColor);
+			m_BtnGameModeAABB = AABB2D(pos - size * 0.5f, pos + size * 0.5f);
+		}
+
+		Renderer2D::EndScene();
 	}
 
 	// -- Event hanling --
@@ -166,18 +222,35 @@ namespace TicTacToe {
 		{
 			case Mouse::Button0:
 			{
+				uint32_t x = (uint32_t)Input::GetMouseX();
+				uint32_t y = (uint32_t)Input::GetMouseY();
+
+				uint32_t windowWidthPx = Application::Get().GetWindow().GetWidth();
+				uint32_t windowHeightPx = Application::Get().GetWindow().GetHeight();
+
+				// Hit position in our projection space (-0.5 to 0.5 in this case)
+				glm::vec2 p;
+				{
+					p.x = (float)x / windowHeightPx - (float)windowWidthPx / (float)windowHeightPx * 0.5f;
+					p.y = (float)(windowHeightPx - y) / (float)windowHeightPx - 0.5f;
+				}
+
+				// Game mode button
+				if (m_BtnGameModeAABB.IsWithin(p))
+				{
+					m_GameMode = (GameMode)!(bool)m_GameMode;
+					m_Board.Reset();
+					m_Score = Score();
+					m_GameState = GameState::Running;
+					break;
+				}
+
 				if (m_GameState == GameState::Over)
 				{
 					m_Board.Reset();
 					m_GameState = GameState::Running;
 					break;
 				}
-
-				uint32_t x = (uint32_t)Input::GetMouseX();
-				uint32_t y = (uint32_t)Input::GetMouseY();
-
-				uint32_t windowWidthPx = Application::Get().GetWindow().GetWidth();
-				uint32_t windowHeightPx = Application::Get().GetWindow().GetHeight();
 
 				uint32_t boardSizePx = (uint32_t)((float)windowHeightPx * m_Style.BoardSize);
 
@@ -191,7 +264,7 @@ namespace TicTacToe {
 				if (x > boardLeftPx && y > boardTopPx && x < boardRightPx && y < boardBottomPx)
 				{
 					// Ignore some clicks on the board
-					if ((m_GameMode == GameMode::SinglePlayer && m_Turn != Team::X) || m_GameMode == GameMode::AIvsAI)
+					if ((m_GameMode == GameMode::SinglePlayer && m_Turn != Team::X))
 						break;
 
 					float pixelsPerCell = (float)boardSizePx / 3.0f;
@@ -219,6 +292,8 @@ namespace TicTacToe {
 						}
 						else if (m_Board.IsFull())
 						{
+							m_Score.Tie++;
+
 							ME_LOG("Stale mate, noone wins!");
 							m_GameState = GameState::Over;
 						}

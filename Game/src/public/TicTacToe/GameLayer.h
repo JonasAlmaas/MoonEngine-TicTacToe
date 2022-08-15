@@ -20,7 +20,7 @@ namespace TicTacToe {
 
 	private:
 		void DrawBoard();
-		void DrawScoreboard();
+		void DrawUI();
 
 		bool OnMouseButtonPressedEvent(MouseButtonPressedEvent& e);
 		bool OnWindowResizeEvent(WindowResizeEvent& e);
@@ -37,7 +37,10 @@ namespace TicTacToe {
 		Team m_Turn = Team::X;
 		Score m_Score;
 
-		Ref<Font> m_FontSegoeUIBold, m_FontSegoeUISemiBold;
+		Ref<FontAsset> m_FontRobotoBold, m_FontRobotoMedium;
+		Ref<Texture2D> m_GearTexture;
+
+		AABB2D m_BtnGameModeAABB;
 
 		float m_FrameTime = 0.0f;
 

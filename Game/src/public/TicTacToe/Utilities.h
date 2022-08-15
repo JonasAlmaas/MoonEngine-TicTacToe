@@ -5,11 +5,10 @@ using namespace Moon;
 
 namespace TicTacToe {
 
-	enum class GameMode : uint8_t
+	enum class GameMode : bool
 	{
 		SinglePlayer,
 		TwoPlayer,
-		AIvsAI
 	};
 
 	enum class GameState : bool
@@ -27,6 +26,7 @@ namespace TicTacToe {
 	{
 		uint32_t X = 0;
 		uint32_t O = 0;
+		uint32_t Tie = 0;
 	};
 
 	struct BoardStyle
@@ -43,6 +43,10 @@ namespace TicTacToe {
 		float XLineWidth;
 		float XLineRadius;
 		float CircleThickness;
+
+		float TextSizeSmall;
+		float TextSizeBig;
+		float TextSizeTitle;
 
 		Color BackgroundColor;
 		Color WhiteColor;
