@@ -19,6 +19,8 @@ namespace TicTacToe {
 		virtual void OnEvent(Event& e) override;
 
 	private:
+		void PostMove();
+
 		void DrawBoard();
 		void DrawUI();
 
@@ -41,6 +43,9 @@ namespace TicTacToe {
 		Ref<Texture2D> m_GearTexture;
 
 		AABB2D m_BtnGameModeAABB;
+
+		const float m_AIDelay = 0.5f;
+		float m_LastAITime = 0.0f;
 
 		float m_FrameTime = 0.0f;
 

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "TicTacToe/GameLayer.h"
 
+#include "TicTacToe/AI.h"
+
 
 namespace TicTacToe {
 
@@ -55,10 +57,51 @@ namespace TicTacToe {
 	void GameLayer::OnUpdate(Timestep ts)
 	{
 		m_FrameTime = ts;
+
+		if (m_GameMode == GameMode::SinglePlayer && m_Turn == Team::O)
+		{
+			m_Board = AI::MakeMove(m_Board, m_Turn);
+			PostMove();
+		}
+		else if (m_GameMode == GameMode::AIvAI)
+		{
+			float timeNow = Time::Get();
+			if (timeNow >= m_LastAITime + m_AIDelay)
+			{
+				m_Board = AI::MakeMove(m_Board, m_Turn);
+				PostMove();
+				m_LastAITime = timeNow;
+			}
+		}
+
 		RenderCommand::Clear();
 
 		DrawBoard();
 		DrawUI();
+	}
+
+	void GameLayer::PostMove()
+	{
+		// Checks if the last move was a winning move.
+		if (m_Board.Evaluate(m_Turn))
+		{
+			if (m_Turn == Team::X)
+				m_Score.X++;
+			else
+				m_Score.O++;
+
+			ME_LOG("Player {} won!", (bool)m_Turn ? "O" : "X");
+			m_GameState = GameState::Over;
+		}
+		else if (m_Board.IsFull())
+		{
+			m_Score.Tie++;
+
+			ME_LOG("Stale mate, noone wins!");
+			m_GameState = GameState::Over;
+		}
+
+		m_Turn = (Team)!(bool)m_Turn;
 	}
 
 	void GameLayer::DrawBoard()
@@ -170,16 +213,22 @@ namespace TicTacToe {
 
 		switch (m_GameMode)
 		{
-			case TicTacToe::GameMode::SinglePlayer:
+			case GameMode::SinglePlayer:
 			{
 				textX = TextSurface("PLAYER (X)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
 				textO = TextSurface("COMPUTER (O)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
 				break;
 			}
-			case TicTacToe::GameMode::TwoPlayer:
+			case GameMode::TwoPlayer:
 			{
 				textX = TextSurface("PLAYER (X)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
 				textO = TextSurface("PLAYER (O)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				break;
+			}
+			case GameMode::AIvAI:
+			{
+				textX = TextSurface("COMPUTER (X)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
+				textO = TextSurface("COMPUTER (O)", m_FontRobotoMedium, m_Style.TextSizeSmall, m_Style.WhiteColor);
 				break;
 			}
 		}
@@ -238,9 +287,15 @@ namespace TicTacToe {
 				// Game mode button
 				if (m_BtnGameModeAABB.IsWithin(p))
 				{
-					m_GameMode = (GameMode)!(bool)m_GameMode;
+					switch (m_GameMode)
+					{
+						case GameMode::SinglePlayer:	m_GameMode = GameMode::TwoPlayer; break;
+						case GameMode::TwoPlayer:		m_GameMode = GameMode::AIvAI; break;
+						case GameMode::AIvAI:			m_GameMode = GameMode::SinglePlayer; break;
+					}
+
 					m_Board.Reset();
-					m_Score = Score();
+					m_Score = Score{};
 					m_GameState = GameState::Running;
 					break;
 				}
@@ -278,27 +333,7 @@ namespace TicTacToe {
 					if (m_Board.IsEmptyCell(cellX, cellY))
 					{
 						m_Board.SetCell(cellX, cellY, m_Turn);
-
-						// Checks if the last move was a winning move.
-						if (m_Board.Evaluate(m_Turn))
-						{
-							if (m_Turn == Team::X)
-								m_Score.X++;
-							else
-								m_Score.O++;
-
-							ME_LOG("Player {} won!", (bool)m_Turn ? "O" : "X");
-							m_GameState = GameState::Over;
-						}
-						else if (m_Board.IsFull())
-						{
-							m_Score.Tie++;
-
-							ME_LOG("Stale mate, noone wins!");
-							m_GameState = GameState::Over;
-						}
-
-						m_Turn = (Team)!(bool)m_Turn;
+						PostMove();
 					}
 				}
 

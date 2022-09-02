@@ -9,6 +9,8 @@ namespace TicTacToe {
 	{
 	public:
 		Board() = default;
+		Board(const Board& board)
+			: m_BitMap(board.m_BitMap) {}
 
 		void Reset();
 

@@ -9,6 +9,7 @@ namespace TicTacToe {
 	{
 		SinglePlayer,
 		TwoPlayer,
+		AIvAI,
 	};
 
 	enum class GameState : bool
@@ -20,6 +21,14 @@ namespace TicTacToe {
 	enum class Team : bool
 	{
 		X, O,
+	};
+
+	enum class Difficulty : uint8_t
+	{
+		Easy,			// Random
+		Medium,			// Minimax with 50% randomness
+		Hard,			// Minimax with 10% randomness
+		Impossible,		// Minimax with 0% randomness
 	};
 
 	struct Score
